@@ -1,7 +1,16 @@
-CREATE DATABASE wordpress;
-CREATE USER 'wpuser'@'%' IDENTIFIED BY 'password';
-GRANT ALL PRIVILEGES ON *.* TO 'wpuser'@'%' WITH GRANT OPTION;
+CREATE DATABASE IF NOT EXISTS wordpress;
+
+DROP USER IF EXISTS 'wpuser'@'%';
+DROP USER IF EXISTS 'root'@'%';
+
+CREATE USER 'wpuser'@'%' IDENTIFIED BY 'wppassword';
+CREATE USER 'root'@'%' IDENTIFIED BY 'rootpassword';
+GRANT ALL PRIVILEGES ON wordpress.* TO 'wpuser'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+
 FLUSH PRIVILEGES;
+
+
 
 
 

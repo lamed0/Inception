@@ -23,9 +23,8 @@ down:
 
 # Full clean: stop containers, remove volumes & networks, delete local data
 fclean: down
-	@docker volume rm mariadb-data inception_web-data || true
 	@docker network prune -f
-	@sudo rm -rf $(MARIADB_VOLUME) $(WORDPRESS_VOLUME)
+
 
 
 # Rebuild everything from scratch

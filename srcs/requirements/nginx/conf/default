@@ -18,11 +18,17 @@
 
 # Default server configuration
 #
+
+
+
 server {
     listen 80;
     listen [::]:80;
 
-    server_name _;
+	server_name _;
+
+	root /var/www/html;
+	index index.html;
 
     return 301 https://$host$request_uri;
 }

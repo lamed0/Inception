@@ -18,6 +18,7 @@ services:
     container_name: wordpress
     depends_on:
       - mariadb
+      - redis
     volumes:
       - ../data/wordpress:/var/www/html
     env_file:
@@ -28,13 +29,80 @@ services:
   mariadb:
     build: requirements/mariadb/.
     container_name: mariadb
+    expose:
+      - "3306:3306"
     volumes:
       - mariadb-data:/var/lib/mysql
+      - ./requirements/mariadb/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
+
     env_file:
       - .env
     networks:
       - inception-network
 
+
+  redis:
+    build: ./requirements/bonus/redis
+    container_name: redis
+    restart: always
+    networks:
+      - inception-network
+    expose:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    
+
+  ftp:
+    build: ./requirements/bonus/ftp
+    container_name: ftp
+    env_file: .env
+    environment:
+      - FTP_USER=${FTP_USER}
+      - FTP_PASS=${FTP_PASS}
+      - PASV_MIN=${PASV_MIN}
+      - PASV_MAX=${PASV_MAX}
+    ports:
+      - "20:20"
+      - "21:21"
+      - "${PASV_MIN}-${PASV_MAX}:${PASV_MIN}-${PASV_MAX}"
+    volumes:
+      - ../data/wordpress:/var/www/wordpress
+    depends_on:
+      - wordpress
+    restart: unless-stopped
+    networks:
+      - inception-network
+
+
+  adminer:
+    build: ./requirements/bonus/adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - inception-network
+
+  website:
+    build: ./requirements/bonus/website
+    container_name: website
+    restart: always
+    ports:
+      - "8081:80"
+  
+  phpmyadmin:
+    build: ./requirements/bonus/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8082:80"
+    env_file:
+      - .env
+    depends_on:
+      - mariadb
+    networks:
+      - inception-network
 
 networks:
   inception-network:
@@ -42,10 +110,6 @@ networks:
 
 volumes:
   mariadb-data:
-    driver: local
-    driver_opts:
-      o: bind
-      type: none
-      device: ../data/mariadb
+  redis-data:
 
 
