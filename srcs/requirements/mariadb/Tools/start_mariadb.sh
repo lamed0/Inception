@@ -1,26 +1,32 @@
 #!/bin/bash
-# start_mariadb.sh
 
-MYSQL_DATA_DIR="/var/lib/mysql"
+# Fix permissions for mounted volume
+chown -R mysql:mysql /var/lib/mysql
+chown -R mysql:mysql /run/mysqld
 
-# Initialize database if empty
-if [ ! -d "$MYSQL_DATA_DIR/mysql" ]; then
-    echo "Initializing MariaDB..."
-    mysqld --initialize-insecure --user=mysql --datadir="$MYSQL_DATA_DIR"
-    
-    # Start MariaDB in the background
-    mysqld --skip-networking --user=mysql --datadir="$MYSQL_DATA_DIR" &
-    pid="$!"
-    sleep 5
-
-    # Execute init SQL
-    mysql < /docker-entrypoint-initdb.d/init.sql
-
-    # Stop background server
-    kill $pid
+# Initialize database if it doesn't exist
+if [ ! -d "/var/lib/mysql/mysql" ]; then
+    echo "Initializing database..."
+    mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
 fi
 
-# Start MariaDB normally
-exec mysqld --user=mysql --datadir="$MYSQL_DATA_DIR"
+# Start MariaDB in the background as mysql user
+echo "Starting MariaDB..."
+mariadbd --user=mysql --datadir=/var/lib/mysql &
 
+# Wait for MariaDB to be ready
+echo "Waiting for MariaDB to start..."
+while ! mariadb -e "SELECT 1" &>/dev/null 2>&1; do
+    sleep 1
+done
 
+echo "MariaDB is ready!"
+
+# Run initialization SQL if it exists
+if [ -f "/etc/mysql/init.sql" ]; then
+    echo "Running initialization SQL..."
+    mariadb < /etc/mysql/init.sql
+fi
+
+# Keep the container running
+wait

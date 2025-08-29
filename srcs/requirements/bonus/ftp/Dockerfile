@@ -10,13 +10,13 @@ RUN apt-get update && apt-get install -y \
 
 RUN mkdir -p /var/log/vsftpd
 
-COPY vsftpd.conf /etc/vsftpd.conf
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY conf/vsftpd.conf /etc/vsftpd.conf
+COPY Tools/entrypoint.sh /Tools/entrypoint.sh
+RUN chmod +x /Tools/entrypoint.sh
 
 EXPOSE 20
 EXPOSE 21
 EXPOSE 21100-21110
 
-CMD ["./entrypoint.sh"]
+CMD ["./Tools/entrypoint.sh"]
 

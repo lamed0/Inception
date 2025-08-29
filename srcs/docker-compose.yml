@@ -8,32 +8,32 @@ services:
     ports:
       - "443:443"
     volumes:
-      - ../data/wordpress:/var/www/html
-      - ../data/certs:/etc/ssl/nginx
+      - wordpress:/var/www/html
+      - ../secrets/certs:/etc/ssl/nginx
     networks:
       - inception-network
 
   wordpress:
     build: requirements/wordpress/.
     container_name: wordpress
+    env_file:
+      - .env
     depends_on:
       - mariadb
       - redis
     volumes:
-      - ../data/wordpress:/var/www/html
-    env_file:
-      - .env
+      - wordpress:/var/www/html
     networks:
       - inception-network
 
   mariadb:
     build: requirements/mariadb/.
     container_name: mariadb
+    restart: always
     expose:
       - "3306:3306"
     volumes:
       - mariadb-data:/var/lib/mysql
-      - ./requirements/mariadb/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
 
     env_file:
       - .env
@@ -51,7 +51,6 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
-    
 
   ftp:
     build: ./requirements/bonus/ftp
@@ -67,7 +66,7 @@ services:
       - "21:21"
       - "${PASV_MIN}-${PASV_MAX}:${PASV_MIN}-${PASV_MAX}"
     volumes:
-      - ../data/wordpress:/var/www/wordpress
+      - wordpress:/var/www/wordpress
     depends_on:
       - wordpress
     restart: unless-stopped
@@ -107,9 +106,10 @@ services:
 networks:
   inception-network:
     driver: bridge
-
 volumes:
+  wordpress:
   mariadb-data:
   redis-data:
+
 
 
