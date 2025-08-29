@@ -33,19 +33,28 @@ done
 echo "Redis is ready!"
 
 # --- 6. Download WordPress and create wp-config.php ---
-if [ ! -f wp-config.php ]; then
-    echo "Downloading WordPress..."
-    wp core download --allow-root
-    echo "Creating wp-config.php..."
-    wp config create \
-        --dbname="$WORDPRESS_DB_NAME" \
-        --dbuser="$WORDPRESS_DB_USER" \
-        --dbpass="$WORDPRESS_DB_PASSWORD" \
-        --dbhost="$DB_HOST" \
-        --allow-root
-    chmod 664 wp-config.php
+if [ ! -f wp-config.php ] || [ ! -f wp-load.php ] || [ ! -f wp-settings.php ]; then
+    echo "WordPress core files missing, downloading..."
+    
+    # Only download if core files are completely missing
+    if [ ! -f wp-load.php ] || [ ! -f wp-settings.php ]; then
+        echo "Downloading WordPress core..."
+        wp core download --allow-root
+    fi
+    
+    # Create wp-config.php if it doesn't exist
+    if [ ! -f wp-config.php ]; then
+        echo "Creating wp-config.php..."
+        wp config create \
+            --dbname="$WORDPRESS_DB_NAME" \
+            --dbuser="$WORDPRESS_DB_USER" \
+            --dbpass="$WORDPRESS_DB_PASSWORD" \
+            --dbhost="$DB_HOST" \
+            --allow-root
+        chmod 664 wp-config.php
+    fi
 else
-    echo "WordPress already downloaded and wp-config.php exists, skipping download."
+    echo "WordPress core files and wp-config.php exist, skipping download."
 fi
 
 # --- 7. Install WordPress if not already installed ---

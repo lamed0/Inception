@@ -8,7 +8,7 @@ services:
     ports:
       - "443:443"
     volumes:
-      - wordpress:/var/www/html
+      - /home/med/data/wordpress:/var/www/html
       - ../secrets/certs:/etc/ssl/nginx
     networks:
       - inception-network
@@ -22,7 +22,7 @@ services:
       - mariadb
       - redis
     volumes:
-      - wordpress:/var/www/html/wp-content
+      - /home/med/data/wordpress:/var/www/html/
     networks:
       - inception-network
 
@@ -33,7 +33,7 @@ services:
     expose:
       - "3306:3306"
     volumes:
-      - mariadb-data:/var/lib/mysql
+      - /home/med/data/mariadb:/var/lib/mysql
 
     env_file:
       - .env
@@ -50,7 +50,7 @@ services:
     expose:
       - "6379:6379"
     volumes:
-      - redis-data:/data
+      - /home/med/data/redis:/data
 
   ftp:
     build: ./requirements/bonus/ftp
@@ -66,7 +66,7 @@ services:
       - "21:21"
       - "${PASV_MIN}-${PASV_MAX}:${PASV_MIN}-${PASV_MAX}"
     volumes:
-      - wordpress:/var/www/wordpress
+      - /home/med/data/wordpress:/var/www/wordpress
     depends_on:
       - wordpress
     restart: unless-stopped
@@ -106,10 +106,7 @@ services:
 networks:
   inception-network:
     driver: bridge
-volumes:
-  wordpress:
-  mariadb-data:
-  redis-data:
+
 
 
 
