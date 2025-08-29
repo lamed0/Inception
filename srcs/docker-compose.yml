@@ -22,7 +22,7 @@ services:
       - mariadb
       - redis
     volumes:
-      - wordpress:/var/www/html
+      - wordpress:/var/www/html/wp-content
     networks:
       - inception-network
 
